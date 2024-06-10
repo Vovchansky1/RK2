@@ -1,0 +1,28 @@
+name: RK2
+run-name: Calibrating and compiling
+on: [push]
+jobs:
+  compile_on_ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout and get modules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Build tests
+        run: |
+          cmake -H. -B_build -DBUILD_TESTS=ON
+          cmake --build _build
+      - name: Run tests
+        run: |
+          cmake --build _build --target test -- ARGS=--verbose
+      - name: Build app
+        run: |
+          cmake -H. -B_build -DBUILD_MAIN=ON
+          cmake --build _build
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled_main_cpp
+          path: _build

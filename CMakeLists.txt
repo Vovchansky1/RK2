@@ -1,0 +1,32 @@
+cmake_minimum_required(VERSION 3.4)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+project(fabric_testing)
+
+option(BUILD_MAIN "Build app" OFF)
+option(BUILD_TESTS "Build tests" OFF)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/sources)
+
+add_library(ham STATIC ${CMAKE_CURRENT_SOURCE_DIR}/sources/hamburger_l.cpp)
+add_library(mun STATIC ${CMAKE_CURRENT_SOURCE_DIR}/sources/munition_l.cpp)
+
+if (BUILD_MAIN)
+    add_executable(ham_main ${CMAKE_CURRENT_SOURCE_DIR}/sources/hamburger.cpp)
+    add_executable(mun_main ${CMAKE_CURRENT_SOURCE_DIR}/sources/munition.cpp)
+    target_link_libraries(ham_main ham)
+    target_link_libraries(mun_main mun)
+    install(TARGETS ham_main RUNTIME DESTINATION ham_main)
+    install(TARGETS mun_main RUNTIME DESTINATION mun_main)
+endif()
+
+if (BUILD_TESTS)
+    add_subdirectory(third-party/gtest)
+    enable_testing()
+    include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+    include_directories(${gmock_SOURCE_DIR}/include ${gmock_SOURCE_DIR})
+    file(GLOB TEST_SOURCES tests/*.cpp)
+    add_executable(check ${TEST_SOURCES})
+    target_link_libraries(check gtest_main gtest gmock ham mun)
+    add_test(NAME check COMMAND check)
+endif()
